@@ -21,6 +21,7 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: postgresql+asyncpg://postgres:admin@db:5432/stockguard_db
+      TZ: Europe/Warsaw
     depends_on:
       db:
         condition: service_healthy

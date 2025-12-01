@@ -110,7 +110,7 @@ Wymaga zainstalowanego Python, Node.js i PostgreSQL.
 2. Skonfiguruj plik `backend/.env` z danymi dostepu do bazy:
 
 ```env
-DATABASE_URL=postgresql+asyncpg://postgres:HASLO_DO_BAZY@localhost:5432/stockguard_db
+DATABASE_URL=postgresql+asyncpg://UZYTKOWNIK:HASLO_DO_BAZY@localhost:5432/stockguard_db
 ```
 
 **Backend:**
