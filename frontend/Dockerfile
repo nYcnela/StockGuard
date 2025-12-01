@@ -13,6 +13,10 @@ RUN npm ci
 # Copy application code
 COPY . .
 
+# Wartosci przekazywane z docker-compose.yml przez build args
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_WS_URL
+
 # Build the application
 RUN npm run build
 

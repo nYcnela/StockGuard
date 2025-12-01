@@ -157,9 +157,27 @@ Aplikacja bedzie dostepna:
 
 ## Testy
 
+### Lokalnie
+
 Testy korzystaja z tej samej bazy danych co aplikacja (`stockguard_db`). Przed kazdym testem tabele sa tworzone, a po tescie usuwane.
 
 ```bash
 cd backend
 pytest -v
+```
+
+### Docker
+
+Komendy wykonujemy w katalogu projektu (gdzie jest `docker-compose.yml`).
+
+Jesli kontenery sa uruchomione (`docker compose up`):
+
+```bash
+docker compose exec backend pytest -v
+```
+
+Jesli kontenery sa zbudowane, ale nie uruchomione:
+
+```bash
+docker compose run --rm backend pytest -v
 ```

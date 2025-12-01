@@ -54,45 +54,64 @@ export default function Home() {
     fetchProducts();
   }, []);
 
-  // 2. Polaczenie WebSocket
+  // 2. Polaczenie WebSocket z automatycznym reconnect
   useEffect(() => {
-    ws.current = new WebSocket(WS_URL);
+    let reconnectTimeout: NodeJS.Timeout;
+    let isUnmounted = false;
 
-    ws.current.onopen = () => {
-      console.log("Connected to WebSocket");
+    const connect = () => {
+      if (isUnmounted) return;
+
+      ws.current = new WebSocket(WS_URL);
+
+      ws.current.onopen = () => {
+        console.log("Connected to WebSocket");
+      };
+
+      ws.current.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+
+        if (data.type === "status") {
+          setServerStatus({
+            timestamp: data.timestamp,
+            status: data.status,
+          });
+        } else if (data.type === "alert") {
+          setAlert({
+            product: data.product,
+            message: data.message,
+          });
+          // Automatyczne ukrycie alertu po 10 sekundach
+          setTimeout(() => setAlert(null), 10000);
+        } else if (data.type === "product_created") {
+          setProducts((prev) => [...prev, data.product]);
+        } else if (data.type === "product_updated") {
+          setProducts((prev) =>
+            prev.map((p) => (p.id === data.product.id ? data.product : p))
+          );
+        } else if (data.type === "product_deleted") {
+          setProducts((prev) => prev.filter((p) => p.id !== data.product_id));
+        }
+      };
+
+      ws.current.onclose = () => {
+        console.log("Disconnected from WebSocket, reconnecting in 3s...");
+        if (!isUnmounted) {
+          reconnectTimeout = setTimeout(connect, 3000);
+        }
+      };
+
+      ws.current.onerror = () => {
+        console.log("WebSocket error, closing...");
+        ws.current?.close();
+      };
     };
 
-    ws.current.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-
-      if (data.type === "status") {
-        setServerStatus({
-          timestamp: data.timestamp,
-          status: data.status,
-        });
-      } else if (data.type === "alert") {
-        setAlert({
-          product: data.product,
-          message: data.message,
-        });
-        // Automatyczne ukrycie alertu po 10 sekundach
-        setTimeout(() => setAlert(null), 10000);
-      } else if (data.type === "product_created") {
-        setProducts((prev) => [...prev, data.product]);
-      } else if (data.type === "product_updated") {
-        setProducts((prev) =>
-          prev.map((p) => (p.id === data.product.id ? data.product : p))
-        );
-      } else if (data.type === "product_deleted") {
-        setProducts((prev) => prev.filter((p) => p.id !== data.product_id));
-      }
-    };
-
-    ws.current.onclose = () => {
-      console.log("Disconnected from WebSocket");
-    };
+    connect();
 
     return () => {
+      isUnmounted = true;
+      clearTimeout(reconnectTimeout);
       ws.current?.close();
     };
   }, []);
