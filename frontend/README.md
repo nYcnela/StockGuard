@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# StockGuard - Frontend
 
-## Getting Started
+Frontend aplikacji StockGuard zbudowany przy uzyciu Next.js 16 z App Router.
 
-First, run the development server:
+## Technologie
+
+- **Next.js 16** - Framework React z App Router
+- **React 19** - Biblioteka UI
+- **TypeScript** - Statyczne typowanie
+- **Tailwind CSS 4** - Stylowanie
+- **Axios** - Klient HTTP do komunikacji z API
+
+## Funkcjonalnosci
+
+- Wyswietlanie listy produktow w magazynie
+- Dodawanie nowych produktow
+- Edycja istniejacych produktow
+- Usuwanie produktow
+- Polaczenie WebSocket do aktualizacji w czasie rzeczywistym
+- Wyswietlanie statusu serwera
+- Alerty o niskim stanie magazynowym
+
+## Uruchomienie
+
+### Wymagania
+
+- Node.js 20+ (zalecane 23.10)
+- npm lub yarn
+
+### Instalacja
+
+```bash
+npm install
+```
+
+### Tryb deweloperski
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Aplikacja bedzie dostepna pod adresem [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Budowanie produkcyjne
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+## Zmienne srodowiskowe
 
-To learn more about Next.js, take a look at the following resources:
+Utworz plik `.env.local` z nastepujacymi zmiennymi:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_WS_URL=ws://localhost:8000/ws
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Struktura projektu
 
-## Deploy on Vercel
+```
+frontend/
+├── app/
+│   ├── globals.css      # Globalne style CSS
+│   ├── layout.tsx       # Glowny layout aplikacji
+│   └── page.tsx         # Strona glowna z logika CRUD
+├── public/              # Pliki statyczne
+├── Dockerfile           # Konfiguracja Docker
+├── next.config.ts       # Konfiguracja Next.js
+├── package.json         # Zaleznosci projektu
+├── tailwind.config.ts   # Konfiguracja Tailwind CSS
+└── tsconfig.json        # Konfiguracja TypeScript
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Docker
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Aby uruchomic frontend w kontenerze Docker:
+
+```bash
+docker build -t stockguard-frontend .
+docker run -p 3000:3000 stockguard-frontend
+```
+
+Lub uzyj docker-compose z glownego katalogu projektu:
+
+```bash
+docker compose up frontend
+```

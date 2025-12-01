@@ -1,0 +1,28 @@
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+
+# Testing
+.pytest_cache/
+*.db
+*.sqlite
+*.sqlite3
+
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
