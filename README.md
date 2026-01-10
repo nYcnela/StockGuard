@@ -11,9 +11,11 @@ Gdy ilosc produktu spadnie ponizej ustawionego progu, system automatycznie wysyl
 ## Funkcjonalnosci
 
 - **CRUD produktow** - dodawanie, edycja, usuwanie i przegladanie produktow
+- **CRUD kategorii** - zarzadzanie kategoriami produktow z relacja jeden-do-wielu
 - **Monitorowanie w czasie rzeczywistym** - WebSocket przesyla aktualizacje do wszystkich polaczonych klientow
 - **Alerty niskiego stanu** - automatyczne powiadomienia gdy ilosc produktu spadnie ponizej progu
-- **Status serwera** - ciagle monitorowanie stanu backendu (co 5 sekund)
+- **Status serwera z synchronizacja** - ciagle monitorowanie stanu backendu (co 5 sekund) z wykorzystaniem mechanizmu blokad (`asyncio.Lock`) do bezpiecznego dostepu do wspoldzielonych zasobow
+- **Licznik podlaczonych klientow** - informacja o liczbie aktywnych polaczen WebSocket
 - **Responsywny interfejs** - frontend dostosowany do roznych rozmiarow ekranu
 - **Dokumentacja API** - automatycznie generowana przez Swagger UI i ReDoc
 
@@ -55,9 +57,9 @@ StockGuard/
 │   ├── app/
 │   │   ├── main.py          # Aplikacja FastAPI, endpointy REST i WebSocket
 │   │   ├── database.py      # Polaczenie z baza danych
-│   │   ├── models.py        # Model Product (SQLAlchemy)
+│   │   ├── models.py        # Modele SQLAlchemy (Product, Category)
 │   │   ├── schemas.py       # Schematy Pydantic
-│   │   └── websockets.py    # Obsluga WebSocket
+│   │   └── websockets.py    # Obsluga WebSocket z mechanizmem blokad
 │   ├── tests/               # Testy pytest
 │   ├── requirements.txt
 │   ├── Dockerfile
@@ -67,7 +69,7 @@ StockGuard/
 │   ├── app/
 │   │   ├── globals.css      # Globalne style CSS
 │   │   ├── layout.tsx       # Glowny layout aplikacji
-│   │   └── page.tsx         # Strona glowna z logika CRUD
+│   │   └── page.tsx         # Strona glowna z logika CRUD (produkty i kategorie)
 │   ├── public/              # Pliki statyczne
 │   ├── Dockerfile
 │   ├── next.config.ts
@@ -146,14 +148,39 @@ Aplikacja bedzie dostepna:
 
 ## API
 
-| Metoda | Endpoint         | Opis                                |
-| ------ | ---------------- | ----------------------------------- |
-| GET    | `/products/`     | Lista produktow                     |
-| POST   | `/products/`     | Dodaj produkt                       |
-| GET    | `/products/{id}` | Pobierz produkt                     |
-| PUT    | `/products/{id}` | Aktualizuj produkt                  |
-| DELETE | `/products/{id}` | Usun produkt                        |
-| WS     | `/ws`            | WebSocket - status serwera i alerty |
+### Produkty
+
+| Metoda | Endpoint         | Opis               |
+| ------ | ---------------- | ------------------ |
+| GET    | `/products/`     | Lista produktow    |
+| POST   | `/products/`     | Dodaj produkt      |
+| GET    | `/products/{id}` | Pobierz produkt    |
+| PUT    | `/products/{id}` | Aktualizuj produkt |
+| DELETE | `/products/{id}` | Usun produkt       |
+
+### Kategorie
+
+| Metoda | Endpoint           | Opis                 |
+| ------ | ------------------ | -------------------- |
+| GET    | `/categories/`     | Lista kategorii      |
+| POST   | `/categories/`     | Dodaj kategorie      |
+| GET    | `/categories/{id}` | Pobierz kategorie    |
+| PUT    | `/categories/{id}` | Aktualizuj kategorie |
+| DELETE | `/categories/{id}` | Usun kategorie       |
+
+### WebSocket
+
+| Protokol | Endpoint | Opis                                                        |
+| -------- | -------- | ----------------------------------------------------------- |
+| WS       | `/ws`    | Status serwera, alerty i aktualizacje w czasie rzeczywistym |
+
+## Mechanizm synchronizacji
+
+Status serwera (`server_status`) jest przesylany przez WebSocket z wykorzystaniem mechanizmu blokad (`asyncio.Lock`). Zapewnia to bezpieczny dostep do wspoldzielonych zasobow w srodowisku asynchronicznym:
+
+- **ServerStatus** - klasa przechowujaca status serwera z blokada
+- **ConnectionManager** - zarzadza polaczeniami WebSocket z blokada na liscie polaczen
+- Kazda operacja odczytu/zapisu na wspoldzielonych danych jest chroniona przez `async with self._lock`
 
 ## Testy
 
