@@ -352,7 +352,10 @@ async def update_product(product_id: int, product_update: ProductUpdate, db: Asy
 
     await db.commit()
     
-    # Pobranie zaktualizowanego produktu z zaladowana relacja kategorii
+    # Wyczyszczenie cache i pobranie zaktualizowanego produktu z zaladowana relacja kategorii
+    await db.refresh(db_product)
+    db.expire(db_product)
+    
     result = await db.execute(
         select(Product).options(selectinload(Product.category)).filter(Product.id == product_id)
     )
